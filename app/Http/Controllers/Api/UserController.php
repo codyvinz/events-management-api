@@ -5,11 +5,10 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
-use App\Models\Event;
-use App\Http\Requests\EventRequest;
+use App\Models\User;
 
 
-class EventController extends Controller
+class UserController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -17,34 +16,26 @@ class EventController extends Controller
     public function index()
     {
         //
-        return Event::all();
-    }
+        return User::all();
 
+    }
+ 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(EventRequest $request)
+    public function store(Request $request)
     {
         //
-        $event_data=  $request->validated();
-
-        $event_data['user_id'] = 1;
-        $event_data['description'] = fake()->text;
-
-        $event = Event::create($event_data);
-
-        return $event;
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(Event $event)
+    public function show(string $id)
     {
         //
-
-        return $event;
     }
+   
 
     /**
      * Update the specified resource in storage.
