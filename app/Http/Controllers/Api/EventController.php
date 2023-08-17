@@ -6,7 +6,10 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
 use App\Models\Event;
+
 use App\Http\Requests\EventRequest;
+use App\Http\Resources\EventResource;
+
 
 
 class EventController extends Controller
@@ -17,7 +20,11 @@ class EventController extends Controller
     public function index()
     {
         //
-        return Event::all();
+        return EventResource::collection(
+            Event::with('user')->paginate()
+        );
+
+//        return EventResource::collection(Event::with('user')->get());
     }
 
     /**
@@ -26,14 +33,14 @@ class EventController extends Controller
     public function store(EventRequest $request)
     {
         //
-        $event_data=  $request->validated();
+        $event_data =  $request->validated();
 
         $event_data['user_id'] = 1;
         $event_data['description'] = fake()->text;
 
         $event = Event::create($event_data);
 
-        return $event;
+        return new EventResource($event);
     }
 
     /**
@@ -42,23 +49,44 @@ class EventController extends Controller
     public function show(Event $event)
     {
         //
+        $event->load('user', 'attendees');
+        return new EventResource($event);
 
-        return $event;
-    }
+     }
 
     /**
      * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+     */   
+
+    public function update(Request $request, Event $event)
     {
-        //
+        // 
+
+        $event->update(
+            
+            $request->validate([ 
+            'name' => 'sometimes|string|max:255',
+            'description' => 'nullable|string',
+            'start_time' => 'sometimes|date',
+            'end_time' => 'sometimes|date|after:start_time',
+            ])
+        
+        );
+
+        return new EventResource($event);
+
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+
+    public function destroy(Event $event)
     {
         //
+        $event->delete();
+
+        return response(status: 204);
     }
+
 }
