@@ -11,21 +11,50 @@ use App\Http\Requests\EventRequest;
 use App\Http\Resources\EventResource;
 
 
+use App\Http\Traits\CanLoadRelationships;
+
 
 class EventController extends Controller
 {
+    use CanLoadRelationShips;
+
+    private array $relations= ['user', 'attendees', 'attendees.user'];
+
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        //
-        return EventResource::collection(
-            Event::with('user')->paginate()
-        );
 
-//        return EventResource::collection(Event::with('user')->get());
+        $query = $this->loadRelationships(Event::query());
+
+        // foreach ($relations as $relation) {
+        //     $query->when(
+        //         $this->shouldIncludeRelation($relation),
+        //         fn($q) => $q->with($relation)
+        //     );
+        // }
+
+        return EventResource::collection(
+            $query->latest()->paginate()
+        );
+    
     }
+
+
+    protected function shouldIncludeRelation(string $relation): bool
+    {
+        $include = request()->query('include');
+
+        if (!$include) {
+            return false;
+        }
+
+        $relations = array_map('trim', explode(',', $include));
+
+        return in_array($relation, $relations);
+    }
+
 
     /**
      * Store a newly created resource in storage.
@@ -36,11 +65,11 @@ class EventController extends Controller
         $event_data =  $request->validated();
 
         $event_data['user_id'] = 1;
-        $event_data['description'] = fake()->text;
+        $event_data['description'] = $event_data['description'] ?? fake()->text ;
 
         $event = Event::create($event_data);
 
-        return new EventResource($event);
+        return new EventResource($this->loadRelationships($event));
     }
 
     /**

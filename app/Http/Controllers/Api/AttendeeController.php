@@ -12,9 +12,12 @@ use App\Models\Attendee;
 use App\Http\Resources\EventResource;
 use App\Http\Resources\AttendeeResource;
 
+use App\Http\Traits\CanLoadRelationships;
 
 class AttendeeController extends Controller
 {
+    use CanLoadRelationShips;
+
     /**
      * Display a listing of the resource.
      */
@@ -22,11 +25,17 @@ class AttendeeController extends Controller
     {
         //
 
-        $attendees = $event->attendees()->latest();
-
-        return AttendeeResource::collection(
-            Event::with('user')->paginate()
+        $attendees = $this->loadRelationships(
+            $event->attendees()->latest()
         );
+        
+        return AttendeeResource::collection(
+            $attendees->paginate()
+        );
+
+        // return AttendeeResource::collection(
+        //     Event::with('user')->paginate()
+        // );
     }
 
     /**
@@ -36,10 +45,11 @@ class AttendeeController extends Controller
     {
         //
 
- 
-        $attendee = $event->attendees()->create([
-            'user_id' => 1
-        ]);
+        $attendee = $this->loadRelationships(
+            $event->attendees()->create([
+                'user_id' => 1
+            ])
+        );
 
         return new AttendeeResource($attendee);
 
@@ -52,7 +62,9 @@ class AttendeeController extends Controller
     {
         //
 
-        return new AttendeeResource($attendee);
+        return new AttendeeResource(
+            $this->loadRelationships($attendee)
+        );
 
     }
 
@@ -69,7 +81,6 @@ class AttendeeController extends Controller
      */
     public function destroy(string $event, Attendee $attendee)
     {
-        //
 
         $attendee->delete();
 

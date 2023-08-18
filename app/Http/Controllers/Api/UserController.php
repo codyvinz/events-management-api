@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 
 use App\Models\User;
 
+use App\Http\Resources\UserResource;
 
 class UserController extends Controller
 {
@@ -21,7 +22,7 @@ class UserController extends Controller
     }
  
     /**
-     * Store a newly created resource in storage.
+     * Store a newly    created resource in storage.
      */
     public function store(Request $request)
     {
@@ -31,9 +32,10 @@ class UserController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(User $user)
     {
-        //
+
+        return new UserResource($user);
     }
    
 
