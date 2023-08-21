@@ -12,6 +12,7 @@ use App\Http\Resources\EventResource;
 
 
 use App\Http\Traits\CanLoadRelationships;
+use Illuminate\Support\Facades\Gate;
 
 
 class EventController extends Controller
@@ -98,6 +99,12 @@ class EventController extends Controller
     public function update(Request $request, Event $event)
     {
         // 
+
+        // if(Gate::denies('update-event', $event)){
+        //     abort(403, "Unauthorized to update event!");
+        // }
+
+        $this->authorize('update-event', $event);
 
         $event->update(
             
