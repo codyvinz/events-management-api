@@ -26,6 +26,8 @@ class EventController extends Controller
 
         $this->middleware('auth:sanctum')->except(['index', 'show']);
 
+        $this->authorizeResource(Event::class, 'event');
+
     }
 
 
