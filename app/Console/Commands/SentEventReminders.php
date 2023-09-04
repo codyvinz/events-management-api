@@ -6,6 +6,8 @@ use Illuminate\Console\Command;
 use App\Models\Event;
 use Illuminate\Support\Str;
 
+use App\Notifications\EventReminderNotification;
+
 class SentEventReminders extends Command
 {
     /**
@@ -38,7 +40,11 @@ class SentEventReminders extends Command
 
         $events->each(
             fn ($event) => $event->attendees->each(
-                fn($attendee) => $this->info("Notifying the user {$attendee->user->id} ")            
+                fn($attendee) => $attendee->user->notify(
+                    new EventReminderNotification(
+                        $event
+                    )
+                )            
             )
         );
 
